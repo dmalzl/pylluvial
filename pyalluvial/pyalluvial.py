@@ -3,6 +3,19 @@ import numpy as np
 import pandas as pd
 import itertools as it
 
+class PlotItemBase:
+    def __init__(self):
+        # add some generic values for PlotItems
+        self.value = 'some generic value'
+
+class Stratum(PlotItemBase):
+    def __init__(self):
+        super.__init__()
+
+class Flow(PlotItemBase):
+    def __init__(self):
+        super.__init__()
+
 def pairwise(iterable):
     '''
     returns successive overlapping pairs taken from the input iterable.
@@ -75,18 +88,6 @@ def to_dataframe(x, y, alluvium, stratum):
 
     return df
 
-def groupby(df, key):
-    '''
-    invokes df.groupby(key, sort = False) in order to shorten the code a bit
-
-    :param df:      pandas.DataFrame
-    :param key:     column on which to group the dataframe
-
-    :return:        pandas.DataFrame.groupby
-    '''
-
-    return df.groupby(key, sort = False)
-
 def get_lodes(data, x, alluvium, stratum):
     '''
     computes lode widths for each flow between strata of successive groups in x
@@ -104,6 +105,9 @@ def get_lodes(data, x, alluvium, stratum):
 
     :return:            nested list of numpy.ndarrays
     '''
+
+    # groupby lambda expression for shorter code
+    groupby = lambda df, key: df.groupby(key, sort = False)
 
     lodes = []
     for (_, g1), (_, g2) in pairwise(groupby(data, x)):

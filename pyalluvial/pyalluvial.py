@@ -1,20 +1,83 @@
+import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import numpy as np
 import pandas as pd
 import itertools as it
 
-class PlotItemBase:
-    def __init__(self):
-        # add some generic values for PlotItems
-        self.value = 'some generic value'
+class Normalizer:
+    def __init__(self, vmin, vmax):
+        self.vmin = vmin
+        self.vmax = vmax
 
-class Stratum(PlotItemBase):
-    def __init__(self):
-        super.__init__()
+    def __call__(self, val, scale = None):
+        norm = (val - self.vmin) / (self.vmax - self.vmin)
+        return norm * scale if scale else norm
 
-class Flow(PlotItemBase):
-    def __init__(self):
-        super.__init__()
+class Stratum:
+    def __init__(self, relative_height, x = 0, y = 0):
+        self.x = x
+        self.y = y
+        self.relative_height = relative_height
+        self.lode_position = 0
+        self.height = 0
+        self.width = 0
+        self.color = None
+
+    def __repr__(self):
+        return f'Stratum(h = {self.height:.02f}, rh = {self.relative_height:.02f}, y = {self.y:.02f})'
+
+    def set_width(self, width):
+        self.width = width
+
+    def set_color(self, color):
+        self.color = color
+
+    def reset_lode_position(self):
+        self.lode_position = self.height
+
+    def get_left_bound(self, gap):
+        return self.x - self.width / 2 - gap
+
+    def get_right_bound(self, gap):
+        return self.x + self.width / 2 + gap
+
+    def get_flow_ycoords(self, relative_flow_width):
+        if not self.lode_position:
+            self.lode_position = self.height
+
+        top = self.lode_position + self.y
+        bottom = top - self.height * relative_flow_width
+        self.lode_position = bottom
+
+        return top, bottom
+
+    def set_xy(self, x, y):
+        self.x = x
+        self.y = y
+
+    def set_height(self, scale, norm = None):
+        height = self.relative_height * scale
+        self.height = norm(height, scale) if norm else height
+
+    def get_patch(self, width, color, alpha):
+        if not self.color:
+            self.color = color
+
+        top_left = [self.x - width / 2, self.y + self.height]
+        top_right = [self.x + width / 2, self.y + self.height]
+        bottom_left = [self.x - width / 2, self.y]
+        bottom_right = [self.x + width / 2, self.y]
+        patch = Polygon(
+            [
+                top_left, top_right,
+                bottom_right, bottom_left
+            ],
+            color = color,
+            alpha = alpha,
+            edgecolor = None,
+            linewidth = None
+        )
+        return patch
 
 def pairwise(iterable):
     '''
@@ -88,6 +151,9 @@ def to_dataframe(x, y, alluvium, stratum):
 
     return df
 
+# groupby lambda expression for shorter code
+groupby = lambda df, key: df.groupby(key, sort = False)
+
 def get_lodes(data, x, alluvium, stratum):
     '''
     computes lode widths for each flow between strata of successive groups in x
@@ -105,9 +171,6 @@ def get_lodes(data, x, alluvium, stratum):
 
     :return:            nested list of numpy.ndarrays
     '''
-
-    # groupby lambda expression for shorter code
-    groupby = lambda df, key: df.groupby(key, sort = False)
 
     lodes = []
     for (_, g1), (_, g2) in pairwise(groupby(data, x)):
@@ -140,9 +203,12 @@ def aggregate_data(data, x, alluvium, stratum):
                         see also function `get_lodes` for more context
     '''
 
-    strata_by_group = [
-        [len(strat) / len(group) for j, strat in groupby(group, stratum)] for i, group in groupby(data, x)
-    ]
+    strata_by_group = []
+    for _, group in groupby(data, x):
+        strata = [
+            Stratum(len(strat) / len(group), 0, 0, ) for _, strat in groupby(group, stratum)
+        ]
+        strata_by_group.append(strata)
 
     lodes = get_lodes(
         data,
@@ -153,7 +219,7 @@ def aggregate_data(data, x, alluvium, stratum):
 
     return strata_by_group, lodes
 
-def plot_strata(group_strata, x, colors, ax, gapsize = 5, scale = 100, width = 0.5, alpha = 0.5):
+def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, scale = 100, width = 0.5, alpha = 0.5):
     '''
     plots stratas for a given group
 
@@ -169,15 +235,104 @@ def plot_strata(group_strata, x, colors, ax, gapsize = 5, scale = 100, width = 0
     :return:                None
     '''
     y = 0
-    for c, stratum in zip(colors, group_strata):
-        height = stratum * scale
-        patch = Polygon(
-            [
-                [x - width, y + height], [x + width, y + height],
-                [x - width, y], [x + width, y]
-            ],
-            color = c,
-            alpha = alpha
+    norm = Normalizer(y, scale + gapsize * (len(group_strata) - 1))
+    # group_strata[::-1] is necessary to comply to top to bottom order of strata
+    for c, stratum in zip(colors, group_strata[::-1]):
+        stratum.set_height(scale, norm)
+        stratum.set_width(width)
+        stratum.set_xy(x, y)
+        ax.add_patch(
+            stratum.get_patch(width, c, alpha)
         )
-        ax.add_patch(patch)
-        y += height + gapsize
+        y += stratum.height + gapsize
+
+def plot_strata(strata, strat_colors, ax, scale = 100):
+    x = 0.25
+    for group_strata, colors in zip(strata, strat_colors):
+        plot_group_strata(
+            group_strata,
+            x,
+            colors,
+            ax,
+            scale = scale
+        )
+        x += scale / 4
+
+    ax.set_xlim(0, x - scale / 4 + 0.25)
+    ax.set_ylim(0, scale)
+
+def get_flow_path(y1, y2, x1, x2, resolution = 50):
+    # partly taken from https://github.com/vinsburg/alluvial_diagram/blob/master/alluvial.py
+    y = np.array([0, 0.15, 0.5, 0.85, 1])
+    y = y * (y2 - y1) + y1
+    x = np.linspace(x1, x2, len(y))
+    z = np.polyfit(x, y, 4)
+    f = np.poly1d(z)
+
+    xs = np.linspace(x[0], x[-1], resolution)
+    ys = f(xs)
+
+    return xs, ys
+
+def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 0.5):
+    y1_bottom, y1_top = g1_strat.get_flow_ycoords(g1_rh)
+    y2_bottom, y2_top = g2_strat.get_flow_ycoords(g2_rh)
+    print(y1_bottom, y1_top, y2_bottom, y2_top)
+    x1 = g1_strat.get_right_bound(1)
+    x2 = g2_strat.get_left_bound(1)
+    x_bottom, y_bottom = get_flow_path(y1_bottom, y2_bottom, x1, x2)
+    x_top, y_top = get_flow_path(y1_top, y2_top, x1, x2)
+    x = np.concatenate([x_top, x_bottom[::-1]])
+    y = np.concatenate([y_top, y_bottom[::-1]])
+    flow_polygon = Polygon(
+        np.array([x, y]).T,
+        color = color,
+        alpha = alpha,
+        edgecolor = None
+    )
+
+    return flow_polygon
+
+def reset_strata(strata):
+    for stratum in strata:
+        stratum.reset_lode_position()
+
+def plot_flows(strata, lodes, ax):
+    for (i, g1_strats), (_, g2_strats) in pairwise(enumerate(strata)):
+        for j, g1_strat in enumerate(g1_strats):
+            relative_widths = lodes[i][j]
+            for k, g2_strat in enumerate(g2_strats):
+                flow_polygon = make_flow_polygon(
+                    g1_strat,
+                    g2_strat,
+                    relative_widths[k][0],
+                    relative_widths[k][1],
+                    g1_strat.color
+                )
+                ax.add_patch(flow_polygon)
+
+        # reset lode_position for next round
+        reset_strata(g2_strats)
+
+if __name__ == '__main__':
+    fig, ax = plt.subplots()
+    data = generate_test_data()
+    strata, lodes = aggregate_data(
+        data,
+        'timepoint',
+        'nodename',
+        'module'
+    )
+    cycler = it.cycle('rgb')
+    colors = [[next(cycler) for i in range(len(group_strata))] for group_strata in strata]
+    plot_strata(
+        strata,
+        colors,
+        ax,
+        scale = 100
+    )
+    plot_flows(
+        strata,
+        lodes,
+        ax
+    )

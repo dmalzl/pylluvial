@@ -118,7 +118,7 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width):
         )
         x += width / len(strata)
 
-    ax.set_xlim(0, x - width / len(strata) + 0.25)
+    ax.set_xlim(0, x - width / len(strata) + stratum_width / 2)
     ax.set_ylim(0, height)
 
 def plot_flows(strata, lodes, ax):

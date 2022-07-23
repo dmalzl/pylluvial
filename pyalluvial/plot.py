@@ -184,10 +184,10 @@ def alluvial(x, stratum, alluvium, colors, data = None, ax = None, stratum_width
     plot_strata(
         strata,
         colors,
+        stratum_width,
         ax,
         plot_height,
         plot_width,
-        stratum_width
     )
 
     plot_flows(

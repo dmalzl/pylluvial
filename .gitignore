@@ -1,3 +1,5 @@
 # directories
 venv/
 .idea/
+pyalluvial.egg-info/
+build/

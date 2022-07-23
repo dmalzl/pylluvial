@@ -1,5 +1,6 @@
 from .stratum import Stratum
 from .utils import pairwise, groupby
+import numpy as np
 
 def get_lodes(data, x, alluvium, stratum):
     '''

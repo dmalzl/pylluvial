@@ -88,7 +88,7 @@ def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, height = 100, wi
         stratum.set_width(width)
         stratum.set_xy(x, y)
         ax.add_patch(
-            stratum.get_patch(width, c, alpha)
+            stratum.get_patch(c, alpha)
         )
         y += stratum.height + gapsize
 

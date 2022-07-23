@@ -1,6 +1,7 @@
 import numpy as np
 import itertools as it
 import pandas as pd
+import seaborn as sns
 
 class Normalizer:
     def __init__(self, vmin, vmax):
@@ -10,6 +11,21 @@ class Normalizer:
     def __call__(self, val, scale = None):
         norm = (val - self.vmin) / (self.vmax - self.vmin)
         return norm * scale if scale else norm
+
+def get_color_list(data, x, stratum, sns_palette = 'husl'):
+    '''
+    returns a list of colors as expected by alluvial
+
+    :param data:    data to plot in wide format
+
+    :return:        list of lists of colors
+    '''
+    color_list_lengths = [group[stratum].nunique() for _, group in groupby(data, x)]
+    palette = sns.color_palette(
+        sns_palette,
+        max(color_list_lengths)
+    )
+    return [[palette[i] for i in range(n)] for n in color_list_lengths]
 
 def pairwise(iterable):
     '''

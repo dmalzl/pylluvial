@@ -29,7 +29,12 @@ fig, ax = pa.alluvial(
     stratum = 'module',
     alluvium = 'nodename',
     colors = colors,
-    data = data
+    data = data,
+    stratum_width = 2
 )
+
+fig.set_figwidth(10)
+fig.set_figheight(5)
+fig.tight_layout()
 ```
-![example plot](/repository/example/example.png?raw=true "Example alluvial diagram")
+![](/example/example.png)

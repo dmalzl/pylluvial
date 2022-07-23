@@ -1,5 +1,5 @@
 # pyalluvial
-A python library for creating alluvial diagrams
+A python library for creating alluvial diagrams with an arbitrary number of layers
 
 # Installation
 Simply clone the repository

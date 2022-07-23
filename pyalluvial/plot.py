@@ -113,7 +113,8 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width):
             x,
             colors,
             ax,
-            height = height
+            height = height,
+            width = stratum_width
         )
         x += width / len(strata)
 

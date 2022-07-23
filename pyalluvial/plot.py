@@ -199,6 +199,6 @@ def alluvial(x, stratum, alluvium, colors, data = None, ax = None, stratum_width
     ax.set_xticks([])
     ax.set_yticks([])
     for pos in ['top', 'bottom', 'left', 'right']:
-        ax.spines[pos].set_visibility(False)
+        ax.spines[pos].set_visibile(False)
 
     return ax if not return_fig else (fig, ax)

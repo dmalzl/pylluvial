@@ -45,9 +45,10 @@ class Stratum:
         if not self.lode_position:
             self.lode_position = self.height
 
+        flow_width = self.height * relative_flow_width
         top = self.lode_position + self.y
-        bottom = top - self.height * relative_flow_width
-        self.lode_position = bottom
+        bottom = top - flow_width
+        self.lode_position -= flow_width
 
         return top, bottom
 
@@ -277,7 +278,6 @@ def get_flow_path(y1, y2, x1, x2, resolution = 50):
 def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 0.5):
     y1_bottom, y1_top = g1_strat.get_flow_ycoords(g1_rh)
     y2_bottom, y2_top = g2_strat.get_flow_ycoords(g2_rh)
-    print(y1_bottom, y1_top, y2_bottom, y2_top)
     x1 = g1_strat.get_right_bound(1)
     x2 = g2_strat.get_left_bound(1)
     x_bottom, y_bottom = get_flow_path(y1_bottom, y2_bottom, x1, x2)

@@ -73,10 +73,8 @@ class Stratum:
                 top_left, top_right,
                 bottom_right, bottom_left
             ],
-            color = color,
-            alpha = alpha,
-            edgecolor = None,
-            linewidth = None
+            facecolor = color,
+            alpha = alpha
         )
         return patch
 
@@ -140,11 +138,10 @@ def generate_test_data():
     )
     return df
 
-def to_dataframe(x, y, alluvium, stratum):
+def to_dataframe(x, alluvium, stratum):
     df = pd.DataFrame(
         {
             'x': x,
-            'y': y,
             'alluvium': alluvium,
             'stratum': stratum
         }
@@ -248,6 +245,17 @@ def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, scale = 100, wid
         y += stratum.height + gapsize
 
 def plot_strata(strata, strat_colors, ax, scale = 100):
+    '''
+    plots strata for each group
+
+    :param strata:          list of list of Stratum objects
+    :param strat_colors:    list of lists of colors to use for plotting (has to be same shape as strata)
+    :param ax:              matplotlib.Axes object to add the strata patches to
+    :param scale:           length of x and y axes
+
+    :return:                None
+    '''
+
     x = 0.25
     for group_strata, colors in zip(strata, strat_colors):
         plot_group_strata(
@@ -262,42 +270,158 @@ def plot_strata(strata, strat_colors, ax, scale = 100):
     ax.set_xlim(0, x - scale / 4 + 0.25)
     ax.set_ylim(0, scale)
 
-def get_flow_path(y1, y2, x1, x2, resolution = 50):
-    # partly taken from https://github.com/vinsburg/alluvial_diagram/blob/master/alluvial.py
+def poly_fit_with_straights(y1, y2, x1, x2, resolution, straight_fraction):
+    '''
+    fits a 4th grade polynomial between x1, y1 and x2, y2
+    with leading and trailing straight lines
+
+    :param y1:                  y coordinate of the first point
+    :param y2:                  y coordinate of the second point
+    :param x1:                  x coordinate of the first point
+    :param x2:                  x coordinate of the second point
+    :param resolution:          resolution of the interpolated polynomial
+    :param straight_fraction:   fraction of the space between x1 and x2 that should be straight lines
+
+    :return:                    numpy.ndarray, np.ndarray containing x and y coordinates of the fitted function
+    '''
+    # adapted from https://github.com/vinsburg/alluvial_diagram/blob/master/alluvial.py
+    straight_length = (x2 - x1) * straight_fraction
+    straight1_x = np.linspace(
+        x1,
+        x1 + straight_length,
+        resolution
+    )
+    straight1_y = np.repeat(y1, resolution)
+    straight2_x = np.linspace(
+        x2 - straight_length,
+        x2,
+        resolution
+    )
+    straight2_y = np.repeat(y2, resolution)
+
     y = np.array([0, 0.15, 0.5, 0.85, 1])
     y = y * (y2 - y1) + y1
-    x = np.linspace(x1, x2, len(y))
+    x = np.linspace(
+        x1 + straight_length,
+        x2 - straight_length,
+        len(y)
+    )
     z = np.polyfit(x, y, 4)
     f = np.poly1d(z)
 
     xs = np.linspace(x[0], x[-1], resolution)
     ys = f(xs)
 
+    xs = np.concatenate([straight1_x, xs, straight2_x])
+    ys = np.concatenate([straight1_y, ys, straight2_y])
+
+    return xs, ys
+
+def sigmoid_fit(y1, y2, x1, x2, resolution):
+    '''
+    fits a sigmoidal curve between x1, y1 and x2, y2
+    with leading and trailing straight lines
+
+    :param y1:                  y coordinate of the first point
+    :param y2:                  y coordinate of the second point
+    :param x1:                  x coordinate of the first point
+    :param x2:                  x coordinate of the second point
+    :param resolution:          resolution of the interpolated sigmoidal
+
+    :return:                    numpy.ndarray, np.ndarray containing x and y coordinates of the fitted function
+    '''
+    sigmoid = lambda x: 1/(1 + np.exp(-x))
+
+    xs = np.linspace(-10, 10, resolution)
+    ys = sigmoid(xs)
+
+    xs = np.linspace(x1, x2, resolution)
+    ys = ys * (y2 - y1) + y1
+
+    return xs, ys
+
+def get_flow_path(y1, y2, x1, x2, resolution = 50, straight_fraction = 0.2, fit = 'poly'):
+    '''
+    compute the flow path between x1, y1 and x2, y2 using either
+    a polynomial with leading and trailing straight lines or a sigmoidal
+
+    :param y1:                  y coordinate of the first point
+    :param y2:                  y coordinate of the second point
+    :param x1:                  x coordinate of the first point
+    :param x2:                  x coordinate of the second point
+    :param resolution:          resolution of the interpolated function
+    :param straight_fraction:   fraction of the space between x1 and x2 that should be straight lines for fit = 'poly'
+    :param fit:                 string specifying the function to use for computing the flow path
+
+    :return:                    numpy.ndarray, np.ndarray containing x and y coordinates of the fitted function
+    '''
+    if fit == 'sigmoid':
+        xs, ys = sigmoid_fit(
+            y1, y2,
+            x1, x2,
+            resolution
+        )
+
+    elif fit == 'poly':
+        xs, ys = poly_fit_with_straights(
+            y1, y2,
+            x1, x2,
+            resolution,
+            straight_fraction
+        )
+
     return xs, ys
 
 def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 0.5):
+    '''
+    generates a matplotlib.patches.Polygon object for a given alluvial flow
+
+    :param g1_strat:    origin Stratum object
+    :param g2_strat:    destination Stratum object
+    :param g1_rh:       flow proportion of origin Stratum
+    :param g2_rh:       flow proportion of destination Stratum
+    :param color:       color of the generated Polygon
+    :param alpha:       opacity of the generated Polygon
+
+    :return:            matplotlib.patches.Polygon for flow between origin and destination Stratum
+    '''
     y1_bottom, y1_top = g1_strat.get_flow_ycoords(g1_rh)
     y2_bottom, y2_top = g2_strat.get_flow_ycoords(g2_rh)
-    x1 = g1_strat.get_right_bound(1)
-    x2 = g2_strat.get_left_bound(1)
+    x1 = g1_strat.get_right_bound(0.5)
+    x2 = g2_strat.get_left_bound(0.5)
     x_bottom, y_bottom = get_flow_path(y1_bottom, y2_bottom, x1, x2)
     x_top, y_top = get_flow_path(y1_top, y2_top, x1, x2)
     x = np.concatenate([x_top, x_bottom[::-1]])
     y = np.concatenate([y_top, y_bottom[::-1]])
     flow_polygon = Polygon(
         np.array([x, y]).T,
-        color = color,
-        alpha = alpha,
-        edgecolor = None
+        facecolor = color,
+        alpha = alpha
     )
 
     return flow_polygon
 
 def reset_strata(strata):
+    '''
+    resets the flow position tracking of all given Stratum objects
+
+    :param strata:  list of Stratum object to reset
+
+    :return:        None
+    '''
     for stratum in strata:
         stratum.reset_lode_position()
 
 def plot_flows(strata, lodes, ax):
+    '''
+    plot flows between strata
+
+    :param strata:  list of lists of Stratum objects
+    :param lodes:   list of lists of numpy.ndarrays holding the Stratum flow proportions (see also get_lodes)
+    :param ax:      matplotlib.Axes object to add the flows to
+
+    :return:        None
+    '''
     for (i, g1_strats), (_, g2_strats) in pairwise(enumerate(strata)):
         for j, g1_strat in enumerate(g1_strats):
             relative_widths = lodes[i][j]
@@ -313,6 +437,53 @@ def plot_flows(strata, lodes, ax):
 
         # reset lode_position for next round
         reset_strata(g2_strats)
+
+def alluvial(x, stratum, alluvium, colors, data = None, ax = None):
+    '''
+    generate alluvial plot. x, stratum and alluvium are either strings if data is given or iterables of same length
+    containing the data to plot in long format (e.g. [0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1])
+
+    :param x:           string denoting the column to use for grouping of data if data is given else iterable
+    :param stratum:     string denoting the column to use for computing stata heights if data is given else iterable
+    :param alluvium:    string denoting the column to use for computing flows between strata if data is given else iterable
+    :param colors:      list of list of colors to use for plotting strata and flows has to have the same shape as group and strata
+    :param data:        pandas.DataFrame containing data in long format
+    :param ax:          matplotlib.Axes object to generate the plot in
+
+    :return:            matplotlib.Axes if ax is given else matplotlib.Figure, matplotlib.Axes
+    '''
+    return_fig = False
+    if not ax:
+        fig, ax = plt.subplots()
+        return_fig = True
+
+    if not isinstance(data, pd.DataFrame):
+        data = to_dataframe(x, alluvium, stratum)
+        x = 'x'
+        stratum = 'stratum',
+        alluvium = 'alluvium'
+
+    strata, lodes = aggregate_data(
+        data,
+        x,
+        alluvium,
+        stratum
+    )
+
+    plot_strata(
+        strata,
+        colors,
+        ax,
+        scale = 100
+    )
+
+    plot_flows(
+        strata,
+        lodes,
+        ax
+    )
+
+    return ax if not return_fig else (fig, ax)
 
 if __name__ == '__main__':
     fig, ax = plt.subplots()

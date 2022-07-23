@@ -17,8 +17,18 @@ you should then be able to import the package as usual
 A minimal usage example would be as follows
 ```python
 import pyalluvial as pa
-import seaborn as sns
 
 data = pa.generate_test_data()
-
+colors = pa.get_color_list(
+    data,
+    'timepoint',
+    'module',
+)
+fig, ax = pa.alluvial(
+    x = 'timepoint',
+    stratum = 'module',
+    alluvium = 'nodename',
+    colors = colors,
+    data = data
+)
 ```

@@ -32,3 +32,4 @@ fig, ax = pa.alluvial(
     data = data
 )
 ```
+![example plot](/repository/example/example.png?raw=true "Example alluvial diagram")

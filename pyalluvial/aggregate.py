@@ -51,8 +51,9 @@ def aggregate_data(data, x, alluvium, stratum):
                         see also function `get_lodes` for more context
     '''
 
-    strata_by_group = []
-    for _, group in groupby(data, x):
+    strata_by_group, group_labels = [], []
+    for group_label, group in groupby(data, x):
+        group_labels.append(group_label)
         strata = [
             Stratum(len(strat) / len(group), 0, 0, label) for label, strat in groupby(group, stratum)
         ]
@@ -65,4 +66,4 @@ def aggregate_data(data, x, alluvium, stratum):
         stratum
     )
 
-    return strata_by_group, lodes
+    return strata_by_group, lodes, group_labels

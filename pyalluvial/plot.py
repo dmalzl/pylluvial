@@ -208,7 +208,7 @@ def alluvial(
         stratum = 'stratum',
         alluvium = 'alluvium'
 
-    strata, lodes = aggregate_data(
+    strata, lodes, strata_labels = aggregate_data(
         data,
         x,
         alluvium,
@@ -231,7 +231,12 @@ def alluvial(
         ax
     )
 
-    ax.set_xticks([])
+    if show_labels:
+        ax.set_xticklabels(strata_labels)
+
+    else:
+        ax.set_xticks([])
+
     ax.set_yticks([])
     for pos in ['top', 'bottom', 'left', 'right']:
         ax.spines[pos].set_visible(False)

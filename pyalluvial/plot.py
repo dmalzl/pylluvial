@@ -111,11 +111,12 @@ def plot_group_strata(
             )
         y += stratum.height + gapsize
 
-def plot_strata(strata, strat_colors, stratum_width, ax, height, width, show_labels):
+def plot_strata(strata, group_labels, strat_colors, stratum_width, ax, height, width, show_labels):
     '''
     plots strata for each group
 
-    :param strata:          list of list of Stratum objects
+    :param strata:          list of lists of Stratum objects
+    :param group_labels:    list of labels for each strata group
     :param strat_colors:    list of lists of colors to use for plotting (has to be same shape as strata)
     :param stratum_width:   width of the Stratum rectangles
     :param ax:              matplotlib.Axes object to add the strata patches to
@@ -127,7 +128,10 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width, show_lab
     '''
 
     x = stratum_width / 2
-    for group_strata, colors in zip(strata, strat_colors):
+    label_positions = []
+    for (group_label, group_strata), colors in zip(group_labels, strata, strat_colors):
+        group_labels.append(group_label)
+        label_positions.append(x)
         plot_group_strata(
             group_strata,
             x,
@@ -138,6 +142,10 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width, show_lab
             show_labels = show_labels
         )
         x += width / len(strata)
+
+    if show_labels:
+        ax.set_xticks(label_positions)
+        ax.set_xticklabels()
 
     ax.set_xlim(0, x - width / len(strata) + stratum_width / 2)
     ax.set_ylim(0, height)
@@ -208,7 +216,7 @@ def alluvial(
         stratum = 'stratum',
         alluvium = 'alluvium'
 
-    strata, lodes, strata_labels = aggregate_data(
+    strata, lodes, group_labels = aggregate_data(
         data,
         x,
         alluvium,
@@ -217,6 +225,7 @@ def alluvial(
 
     plot_strata(
         strata,
+        group_labels,
         colors,
         stratum_width,
         ax,
@@ -231,10 +240,7 @@ def alluvial(
         ax
     )
 
-    if show_labels:
-        ax.set_xticklabels(strata_labels)
-
-    else:
+    if not show_labels:
         ax.set_xticks([])
 
     ax.set_yticks([])

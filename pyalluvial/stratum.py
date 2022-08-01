@@ -67,4 +67,4 @@ class Stratum:
         return patch
 
     def get_label(self):
-        return self.x, self.height / 2, str(self.label)
+        return self.x, self.y + self.height / 2, str(self.label)

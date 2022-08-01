@@ -145,7 +145,7 @@ def plot_strata(strata, group_labels, strat_colors, stratum_width, ax, height, w
 
     if show_labels:
         ax.set_xticks(label_positions)
-        ax.set_xticklabels()
+        ax.set_xticklabels(group_labels)
 
     ax.set_xlim(0, x - width / len(strata) + stratum_width / 2)
     ax.set_ylim(0, height)

@@ -24,6 +24,8 @@ colors = pa.get_color_list(
     'timepoint',
     'module',
 )
+
+# by default labels are not shown
 fig, ax = pa.alluvial(
     x = 'timepoint',
     stratum = 'module',
@@ -37,4 +39,22 @@ fig.set_figwidth(10)
 fig.set_figheight(5)
 fig.tight_layout()
 ```
-![](/example/example.png)
+![](/example/without_labels.png)
+```python
+# pass show_labels = True to get labelled plots
+fig, ax = pa.alluvial(
+    x = 'timepoint',
+    stratum = 'module',
+    alluvium = 'nodename',
+    colors = colors,
+    data = data,
+    stratum_width = 2,
+    show_labels = True
+)
+
+fig.set_figwidth(10)
+fig.set_figheight(5)
+fig.tight_layout()
+```
+![](/example/with_labels.png)
+

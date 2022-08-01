@@ -129,7 +129,7 @@ def plot_strata(strata, group_labels, strat_colors, stratum_width, ax, height, w
 
     x = stratum_width / 2
     label_positions = []
-    for (group_label, group_strata), colors in zip(group_labels, strata, strat_colors):
+    for group_label, group_strata, colors in zip(group_labels, strata, strat_colors):
         group_labels.append(group_label)
         label_positions.append(x)
         plot_group_strata(

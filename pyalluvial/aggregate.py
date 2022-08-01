@@ -54,7 +54,7 @@ def aggregate_data(data, x, alluvium, stratum):
     strata_by_group = []
     for _, group in groupby(data, x):
         strata = [
-            Stratum(len(strat) / len(group), 0, 0, ) for _, strat in groupby(group, stratum)
+            Stratum(len(strat) / len(group), 0, 0, label) for label, strat in groupby(group, stratum)
         ]
         strata_by_group.append(strata)
 

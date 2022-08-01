@@ -36,7 +36,7 @@ def get_flow_path(y1, y2, x1, x2, resolution = 50, straight_fraction = 0.2, fit 
 
     return xs, ys
 
-def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 0.5):
+def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 1):
     '''
     generates a matplotlib.patches.Polygon object for a given alluvial flow
 
@@ -60,12 +60,23 @@ def make_flow_polygon(g1_strat, g2_strat, g1_rh, g2_rh, color, alpha = 0.5):
     flow_polygon = Polygon(
         np.array([x, y]).T,
         facecolor = color,
+        edgecolor = 'white',
         alpha = alpha
     )
 
     return flow_polygon
 
-def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, height = 100, width = 0.5, alpha = 0.5):
+def plot_group_strata(
+        group_strata,
+        x,
+        colors,
+        ax,
+        gapsize = 1,
+        height = 100,
+        width = 0.5,
+        alpha = 1,
+        show_labels = False
+):
     '''
     plots stratas for a given group
 
@@ -77,6 +88,7 @@ def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, height = 100, wi
     :param height:          height of the group column
     :param width:           width of the plotted rectangles
     :param alpha:           opacity of plotted rectangles
+    :param show_labels:     if True, plots Stratum labels
 
     :return:                None
     '''
@@ -90,9 +102,16 @@ def plot_group_strata(group_strata, x, colors, ax, gapsize = 1, height = 100, wi
         ax.add_patch(
             stratum.get_patch(c, alpha)
         )
+        if show_labels:
+            ax.text(
+                *stratum.get_label(),
+                rotation = 90,
+                ha = 'center',
+                va = 'center'
+            )
         y += stratum.height + gapsize
 
-def plot_strata(strata, strat_colors, stratum_width, ax, height, width):
+def plot_strata(strata, strat_colors, stratum_width, ax, height, width, show_labels):
     '''
     plots strata for each group
 
@@ -102,6 +121,7 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width):
     :param ax:              matplotlib.Axes object to add the strata patches to
     :param height:          height of the groups
     :param width:           width of the plot
+    :param show_labels:     if True, plots Stratum labels
 
     :return:                None
     '''
@@ -114,7 +134,8 @@ def plot_strata(strata, strat_colors, stratum_width, ax, height, width):
             colors,
             ax,
             height = height,
-            width = stratum_width
+            width = stratum_width,
+            show_labels = show_labels
         )
         x += width / len(strata)
 
@@ -147,7 +168,18 @@ def plot_flows(strata, lodes, ax):
         # reset lode_position for next round
         reset_strata(g2_strats)
 
-def alluvial(x, stratum, alluvium, colors, data = None, ax = None, stratum_width = 1, plot_height = 100, plot_width = 150):
+def alluvial(
+        x,
+        stratum,
+        alluvium,
+        colors,
+        data = None,
+        ax = None,
+        stratum_width = 2,
+        plot_height = 100,
+        plot_width = 150,
+        show_labels = False
+):
     '''
     generate alluvial plot. x, stratum and alluvium are either strings if data is given or iterables of same length
     containing the data to plot in long format (e.g. [0, 0, 1, 1, 2, 2], [0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1])
@@ -161,6 +193,7 @@ def alluvial(x, stratum, alluvium, colors, data = None, ax = None, stratum_width
     :param stratum_width:   width of the stratum rectangles to plot
     :param plot_height:     height of the generated plot
     :param plot_width:      width of the generated plot
+    :param show_labels:     if True plots Stratum name with each Stratum
 
     :return:                matplotlib.Axes if ax is given else matplotlib.Figure, matplotlib.Axes
     '''
@@ -189,6 +222,7 @@ def alluvial(x, stratum, alluvium, colors, data = None, ax = None, stratum_width
         ax,
         plot_height,
         plot_width,
+        show_labels = show_labels
     )
 
     plot_flows(

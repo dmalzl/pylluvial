@@ -1,6 +1,6 @@
 from matplotlib.patches import Polygon
 class Stratum:
-    def __init__(self, relative_height, x = 0, y = 0):
+    def __init__(self, relative_height, x = 0, y = 0, label = None):
         self.x = x
         self.y = y
         self.relative_height = relative_height
@@ -8,6 +8,7 @@ class Stratum:
         self.height = 0
         self.width = 0
         self.color = None
+        self.label = label
 
     def __repr__(self):
         return f'Stratum(h = {self.height:.02f}, rh = {self.relative_height:.02f}, y = {self.y:.02f})'
@@ -60,6 +61,10 @@ class Stratum:
                 bottom_right, bottom_left
             ],
             facecolor = color,
+            edgecolor = 'white',
             alpha = alpha
         )
         return patch
+
+    def get_label(self):
+        return self.x, self.height / 2, str(self.label)

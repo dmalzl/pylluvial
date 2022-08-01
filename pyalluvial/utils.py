@@ -16,9 +16,12 @@ def get_color_list(data, x, stratum, sns_palette = 'husl'):
     '''
     returns a list of colors as expected by alluvial
 
-    :param data:    data to plot in wide format
+    :param data:            data to plot in wide format
+    :param x:               column in data by which to group along x axis
+    :param stratum:         column in data by which to group groups along x axis
+    :param sns_palette:     string indicating the palette to use for colors (see also seaborn)
 
-    :return:        list of lists of colors
+    :return:                list of lists of colors
     '''
     color_list_lengths = [group[stratum].nunique() for _, group in groupby(data, x)]
     palette = sns.color_palette(

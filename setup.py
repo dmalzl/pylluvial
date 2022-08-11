@@ -8,8 +8,10 @@ def get_requirements(requirementfile):
     return requirements
 
 install_requires = get_requirements('requirements.txt')
-setup(name='pyalluvial',
-    version='1.0.1',
+setup(
+    name='pyalluvial',
+    python_requires = '>3.9',
+    version='1.0.2',
     description='Python package for plotting alluvial diagrams with an arbitrary number of layers',
     url='http://github.com/dmalzl/pyalluvial',
     author='Daniel Malzl',

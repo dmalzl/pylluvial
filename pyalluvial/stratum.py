@@ -1,6 +1,14 @@
 from matplotlib.patches import Polygon
+from typing import Any, Union, Optional
+
 class Stratum:
-    def __init__(self, relative_height, x = 0, y = 0, label = None):
+    def __init__(
+        self,
+        relative_height: float,
+        x: float = 0,
+        y: float = 0,
+        label: Optional[Any] = None
+):
         self.x = x
         self.y = y
         self.relative_height = relative_height
@@ -10,25 +18,25 @@ class Stratum:
         self.color = None
         self.label = label
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Stratum(h = {self.height:.02f}, rh = {self.relative_height:.02f}, y = {self.y:.02f})'
 
-    def set_width(self, width):
+    def set_width(self, width: float) -> None:
         self.width = width
 
-    def set_color(self, color):
+    def set_color(self, color: Union[str, tuple[float, float, float, float]]) -> None:
         self.color = color
 
-    def reset_lode_position(self):
+    def reset_lode_position(self) -> None:
         self.lode_position = self.height
 
-    def get_left_bound(self, gap):
+    def get_left_bound(self, gap: float) -> float:
         return self.x - self.width / 2 - gap
 
-    def get_right_bound(self, gap):
+    def get_right_bound(self, gap: float) -> float:
         return self.x + self.width / 2 + gap
 
-    def get_flow_ycoords(self, relative_flow_width):
+    def get_flow_ycoords(self, relative_flow_width: float) -> tuple[float, float]:
         if not self.lode_position:
             self.lode_position = self.height
 
@@ -39,7 +47,7 @@ class Stratum:
 
         return top, bottom
 
-    def set_xy(self, x, y):
+    def set_xy(self, x: float, y: float) -> None:
         self.x = x
         self.y = y
 
@@ -47,7 +55,11 @@ class Stratum:
         height = self.relative_height * scale
         self.height = norm(height, scale) if norm else height
 
-    def get_patch(self, color, alpha):
+    def get_patch(
+        self,
+        color: Union[str, tuple[float, float, float, float]],
+        alpha: float
+    ) -> Polygon:
         if not self.color:
             self.color = color
 
@@ -66,5 +78,5 @@ class Stratum:
         )
         return patch
 
-    def get_label(self):
+    def get_label(self) -> tuple[float, float, str]:
         return self.x, self.y + self.height / 2, str(self.label)

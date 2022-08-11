@@ -1,8 +1,7 @@
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 
 from .utils import (
     generate_test_data,
-    get_color_list,
     to_dataframe
 )
 

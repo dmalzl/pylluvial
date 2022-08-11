@@ -18,11 +18,8 @@ A minimal usage example would be as follows
 ```python
 import pyalluvial as pa
 
-data = pa.generate_test_data()
-colors = pa.get_color_list(
-    data,
-    'timepoint',
-    'module',
+data = pa.generate_test_data(
+    [3, 4, 3, 2]
 )
 
 # by default labels are not shown
@@ -30,8 +27,9 @@ fig, ax = pa.alluvial(
     x = 'timepoint',
     stratum = 'module',
     alluvium = 'nodename',
-    colors = colors,
     data = data,
+    palette = 'husl',
+    stratum_gap = 2,
     stratum_width = 2
 )
 
@@ -46,8 +44,9 @@ fig, ax = pa.alluvial(
     x = 'timepoint',
     stratum = 'module',
     alluvium = 'nodename',
-    colors = colors,
+    palette = 'husl',
     data = data,
+    stratum_gap = 2,
     stratum_width = 2,
     show_labels = True
 )
@@ -57,4 +56,23 @@ fig.set_figheight(5)
 fig.tight_layout()
 ```
 ![](/example/with_labels.png)
+```python
+# use hue to split strata by a given grouping variable
+fig, ax = pa.alluvial(
+    x = 'timepoint',
+    stratum = 'module',
+    alluvium = 'nodename',
+    hue = 'signif',
+    palette = 'tab20',
+    data = data,
+    stratum_gap = 2,
+    stratum_width = 2,
+    show_labels = True
+)
+
+fig.set_figwidth(10)
+fig.set_figheight(5)
+fig.tight_layout()
+```
+![](/example/with_hue.png)
 

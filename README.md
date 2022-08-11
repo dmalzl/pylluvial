@@ -1,7 +1,10 @@
 # pyalluvial
+![python-version](https://img.shields.io/badge/Python-3.9-blue)
+![stable-version](https://img.shields.io/badge/version-1.0.2-blue)
+
 A python library for creating alluvial diagrams with an arbitrary number of layers
 
-# Installation
+## Installation
 Simply clone the repository
 ```commandline
 git clone git@github.com:dmalzl/pyalluvial.git
@@ -13,7 +16,7 @@ python setup.py install
 ```
 you should then be able to import the package as usual
 
-# Usage
+## Usage
 A minimal usage example would be as follows
 ```python
 import pyalluvial as pa

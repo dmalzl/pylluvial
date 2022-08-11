@@ -1,6 +1,6 @@
 # directories
 venv/
 .idea/
-pyalluvial.egg-info/
+pylluvial.egg-info/
 build/
 dist/

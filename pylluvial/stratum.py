@@ -1,6 +1,7 @@
 from matplotlib.patches import Polygon
 from typing import Any, Union, Optional
 
+
 class Stratum:
     def __init__(
         self,

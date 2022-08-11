@@ -1,25 +1,31 @@
-# pyalluvial
-![python-version](https://img.shields.io/badge/Python-3.9-blue)
+# pylluvial
+![pypi](https://img.shields.io/badge/pypi-v1.1.0-blue)
+![python-version](https://img.shields.io/badge/Python->=3.9-blue)
 ![stable-version](https://img.shields.io/badge/version-1.1.0-blue)
 
 A python library for creating alluvial diagrams with an arbitrary number of layers
 
 ## Installation
-Simply clone the repository
+Simply run the following
+```commandline
+pip install pylluvial
+```
+or clone the repository 
 ```commandline
 git clone git@github.com:dmalzl/pyalluvial.git
 ```
-and run the following
+and run
 ```commandline
-cd pyalluvial
-python setup.py install
+cd pyluvial
+pip install .
 ```
 you should then be able to import the package as usual
 
 ## Usage
 A minimal usage example would be as follows
+
 ```python
-import pyalluvial as pa
+import pylluvial as pa
 
 data = pa.generate_test_data(
     [3, 4, 3, 2]
@@ -27,13 +33,13 @@ data = pa.generate_test_data(
 
 # by default labels are not shown
 fig, ax = pa.alluvial(
-    x = 'timepoint',
-    stratum = 'module',
-    alluvium = 'nodename',
-    data = data,
-    palette = 'husl',
-    stratum_gap = 2,
-    stratum_width = 2
+    x='timepoint',
+    stratum='module',
+    alluvium='nodename',
+    data=data,
+    palette='husl',
+    stratum_gap=2,
+    stratum_width=2
 )
 
 fig.set_figwidth(10)

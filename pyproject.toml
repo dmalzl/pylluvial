@@ -1,0 +1,29 @@
+# pyproject.toml
+
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pylluvial"
+version = "1.1.0"
+description = "Python package for plotting alluvial diagrams with an arbitrary number of layers"
+readme = "README.md"
+authors = [{ name = "Daniel Malzl", email = "daniel@menchelab.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["plotting", "networks", "analysis", "alluvial-plot"]
+dependencies = [
+    "matplotlib >= 3.5.2",
+    "numpy >= 1.23.1",
+    "pandas >= 1.4.3",
+    "seaborn >= 0.11.2"
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/dmalzl/pyalluvial"

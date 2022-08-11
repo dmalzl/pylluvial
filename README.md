@@ -1,6 +1,6 @@
 # pyalluvial
 ![python-version](https://img.shields.io/badge/Python-3.9-blue)
-![stable-version](https://img.shields.io/badge/version-1.0.2-blue)
+![stable-version](https://img.shields.io/badge/version-1.1.0-blue)
 
 A python library for creating alluvial diagrams with an arbitrary number of layers
 

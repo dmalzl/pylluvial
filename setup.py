@@ -11,7 +11,7 @@ install_requires = get_requirements('requirements.txt')
 setup(
     name='pyalluvial',
     python_requires = '>3.9',
-    version='1.0.2',
+    version='1.1.0',
     description='Python package for plotting alluvial diagrams with an arbitrary number of layers',
     url='http://github.com/dmalzl/pyalluvial',
     author='Daniel Malzl',

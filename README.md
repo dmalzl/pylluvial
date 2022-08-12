@@ -12,7 +12,7 @@ pip install pylluvial
 ```
 or clone the repository 
 ```commandline
-git clone git@github.com:dmalzl/pyalluvial.git
+git clone git@github.com:dmalzl/pylluvial.git
 ```
 and run
 ```commandline

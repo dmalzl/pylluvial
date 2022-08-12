@@ -26,4 +26,4 @@ dependencies = [
 requires-python = ">=3.9"
 
 [project.urls]
-Homepage = "https://github.com/dmalzl/pyalluvial"
+Homepage = "https://github.com/dmalzl/pylluvial"

@@ -4,6 +4,7 @@ from .fit import *
 from matplotlib.patches import Polygon
 from typing import Hashable, Optional
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import itertools as it
 
@@ -287,13 +288,17 @@ def alluvial(
     else:
         data['grouping'] = data.loc[:, stratum]
 
-    colors = get_color_dict(
-        data,
-        x,
-        stratum,
-        hue = hue,
-        sns_palette = palette
-    )
+    if isinstance(palette, str):
+        colors = get_color_dict(
+            data,
+            x,
+            stratum,
+            hue = hue,
+            sns_palette = palette
+        )
+
+    else:
+        colors = palette
 
     strata, lodes, group_labels, groupings = aggregate_data(
         data,

@@ -1,7 +1,7 @@
 # pylluvial
-![pypi](https://img.shields.io/badge/pypi-v1.1.0-blue)
+![pypi](https://img.shields.io/badge/pypi-v1.1.1-blue)
 ![python-version](https://img.shields.io/badge/Python->=3.9-blue)
-![stable-version](https://img.shields.io/badge/version-1.1.0-blue)
+![stable-version](https://img.shields.io/badge/version-1.1.1-blue)
 
 A python library for creating alluvial diagrams with an arbitrary number of layers
 

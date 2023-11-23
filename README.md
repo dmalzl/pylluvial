@@ -16,7 +16,7 @@ git clone git@github.com:dmalzl/pylluvial.git
 ```
 and run
 ```commandline
-cd pyluvial
+cd pylluvial
 pip install .
 ```
 you should then be able to import the package as usual
